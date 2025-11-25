@@ -11,7 +11,7 @@ import config
 
 ALLOWED_EXTENSIONS = {"wav", "m4a", "mp3", "flac", "ogg", "mpga", "aac"}
 
-# cria app
+
 app = Flask(__name__)
 app.config.from_object("config")
 app.secret_key = app.config["SECRET_KEY"]
@@ -42,7 +42,7 @@ if os.path.isdir(ffmpeg_bin):
 # Carrega modelo Whisper uma vez (escolha: "tiny","base","small","medium","large")
 # Use "tiny" ou "small" para testes locais — large exige muito.
 print("Carregando modelo Whisper (pode demorar)...")
-MODEL_NAME = os.environ.get("WHISPER_MODEL", "tiny")
+MODEL_NAME = os.environ.get("WHISPER_MODEL", "small")
 model = whisper.load_model(MODEL_NAME)
 print(f"Modelo {MODEL_NAME} carregado.")
 
@@ -165,3 +165,4 @@ def download_transcription(tid):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
