@@ -1,0 +1,13 @@
+body { font-family: system-ui, sans-serif; margin: 0; background:#f6f7fb; color:#222; }
+.topbar { background:#1f2937; color:#fff; padding:12px 20px; display:flex; justify-content:space-between; align-items:center; }
+.brand { color:#fff; text-decoration:none; font-weight:700; }
+nav a { color:#ddd; margin-left:12px; text-decoration:none; }
+.container { padding:20px; max-width:900px; margin:20px auto; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+.flashes { list-style:none; padding:0; }
+.flash { padding:10px; margin-bottom:8px; border-radius:6px; }
+.flash.success { background:#d1fae5; color:#065f46; }
+.flash.warning { background:#ffedd5; color:#92400e; }
+.flash.danger { background:#fee2e2; color:#991b1b; }
+button { padding:8px 12px; border-radius:6px; border:none; background:#2563eb; color:#fff; cursor:pointer; }
+input[type=file] { padding:6px; }
+pre { background:#f3f4f6; padding:10px; border-radius:6px; }

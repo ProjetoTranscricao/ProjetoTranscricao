@@ -1,0 +1,8 @@
+Flask>=2.1
+Flask-Login>=0.6
+Flask-SQLAlchemy>=3.0
+whisper @ git+https://github.com/openai/whisper.git
+numpy
+torch
+python-dotenv
+werkzeug

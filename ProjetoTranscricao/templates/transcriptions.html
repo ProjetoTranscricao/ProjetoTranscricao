@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+  {% if guest %}
+    <h2>Transcrição (convidado)</h2>
+    <p><strong>Arquivo:</strong> {{ filename }}</p>
+    <pre style="white-space:pre-wrap;">{{ text }}</pre>
+    <p><a href="{{ url_for('uploaded_file', filename=filename) }}">Baixar arquivo de áudio</a></p>
+    <p>Observação: modo convidado não salva a transcrição.</p>
+  {% else %}
+    <h2>Minhas transcrições</h2>
+    {% if transcriptions %}
+      <ul>
+      {% for t in transcriptions %}
+        <li>
+          <strong>{{ t.created_at.strftime("%Y-%m-%d %H:%M") }}</strong>
+          — <a href="{{ url_for('uploaded_file', filename=t.filename) }}" target="_blank">Áudio</a>
+          — <a href="{{ url_for('download_transcription', tid=t.id) }}">Baixar TXT</a>
+          <p>{{ t.text[:500] }}{% if t.text|length > 500 %}...{% endif %}</p>
+        </li>
+      {% endfor %}
+      </ul>
+    {% else %}
+      <p>Você não tem transcrições salvas.</p>
+    {% endif %}
+  {% endif %}
+{% endblock %}

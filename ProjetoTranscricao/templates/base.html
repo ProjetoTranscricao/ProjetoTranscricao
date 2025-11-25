@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Transcribe — simples</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <a href="{{ url_for('index') }}" class="brand">Transcribe</a>
+    <nav>
+      {% if current_user.is_authenticated %}
+        <span class="user">Olá, {{ current_user.username }}</span>
+        <a href="{{ url_for('my_transcriptions') }}">Minhas</a>
+        <a href="{{ url_for('logout') }}">Sair</a>
+      {% else %}
+        <a href="{{ url_for('login') }}">Entrar</a>
+        <a href="{{ url_for('register') }}">Registrar</a>
+      {% endif %}
+    </nav>
+  </header>
+  <main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for cat, msg in messages %}
+            <li class="flash {{ cat }}">{{ msg }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
