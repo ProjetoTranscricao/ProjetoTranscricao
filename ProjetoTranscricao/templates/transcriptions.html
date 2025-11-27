@@ -1,26 +1,24 @@
 {% extends "base.html" %}
 {% block content %}
-  {% if guest %}
-    <h2>Transcrição (convidado)</h2>
-    <p><strong>Arquivo:</strong> {{ filename }}</p>
-    <pre style="white-space:pre-wrap;">{{ text }}</pre>
-    <p><a href="{{ url_for('uploaded_file', filename=filename) }}">Baixar arquivo de áudio</a></p>
-    <p>Observação: modo convidado não salva a transcrição.</p>
-  {% else %}
-    <h2>Minhas transcrições</h2>
-    {% if transcriptions %}
-      <ul>
-      {% for t in transcriptions %}
-        <li>
-          <strong>{{ t.created_at.strftime("%Y-%m-%d %H:%M") }}</strong>
-          — <a href="{{ url_for('uploaded_file', filename=t.filename) }}" target="_blank">Áudio</a>
-          — <a href="{{ url_for('download_transcription', tid=t.id) }}">Baixar TXT</a>
-          <p>{{ t.text[:500] }}{% if t.text|length > 500 %}...{% endif %}</p>
-        </li>
-      {% endfor %}
-      </ul>
-    {% else %}
-      <p>Você não tem transcrições salvas.</p>
-    {% endif %}
-  {% endif %}
+  <h2>Resultado da Transcrição</h2>
+  <p><strong>Arquivo:</strong> {{ filename }}</p>
+  <p><strong>Nível de Qualidade Usado:</strong> {{ quality_used }}</p>
+  
+  <h3>Texto Transcrito:</h3>
+  <pre style="white-space:pre-wrap;">{{ text }}</pre>
+
+  <hr>
+  
+  <p>
+    <form method="POST" action="{{ url_for('download_text') }}" style="display:inline;">
+        <input type="hidden" name="text_content" value="{{ text }}">
+        <button type="submit">Baixar TXT da Transcrição</button>
+    </form>
+    
+    <a href="{{ url_for('uploaded_file', filename=filename) }}" style="margin-left: 10px;">Baixar Áudio Original</a>
+    
+    <a href="{{ url_for('index') }}" style="margin-left: 10px;">Fazer Nova Transcrição</a>
+  </p>
+  
+  <p>Observação: esta transcrição não é salva no servidor.</p>
 {% endblock %}
