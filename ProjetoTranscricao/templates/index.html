@@ -3,7 +3,7 @@
 <h1>Enviar áudio para transcrição</h1>
 <p>Você pode enviar um arquivo de áudio para ser transcrito imediatamente.</p>
 
-<form method="post" action="{{ url_for('transcribe') }}" enctype="multipart/form-data">
+<form method="post" action="{{ url_for('transcrever') }}" enctype="multipart/form-data">
   <label for="quality">Modo da Transcrição:</label><br>
   <select name="quality" id="quality" required>
     <option value="Simples">Simples (Rápido)</option>
