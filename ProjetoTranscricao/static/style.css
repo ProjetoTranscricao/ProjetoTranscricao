@@ -1,86 +1,193 @@
+/* styles.css - layout principal e tipografia */
 body {
-    font-family: system-ui, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
     margin: 0;
     background: #f6f7fb;
-    color: #222;
-    display: flex;
-    justify-content: center;
-    flex-direction:column;
-    align-items:center;
+    color: #1f2937;
+    line-height: 1.6;
 }
 
+/* Topbar / Header */
 .topbar {
-    background: #1f2937;
+    background: #111827;
     color: #fff;
-    padding: 12px 20px;
+    padding: 16px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .brand {
     color: #fff;
     text-decoration: none;
-    font-weight: 700;
+    font-weight: 800;
+    font-size: 1.5rem;
+    letter-spacing: 0.5px;
 }
 
 nav a {
-    color: #ddd;
-    margin-left: 12px;
+    color: #d1d5db;
+    margin-left: 18px;
     text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.2s ease-in-out;
 }
 
+nav a:hover {
+    color: #fff;
+}
+
+/* Container principal */
 .container {
-    padding: 20px;
+    padding: 30px;
     max-width: 900px;
-    margin: 20px auto;
+    margin: 40px auto;
     background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
+h1 {
+    color: #1f2937;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+/* Flash messages */
 .flashes {
     list-style: none;
     padding: 0;
+    margin: 0 0 16px 0;
 }
 
 .flash {
-    padding: 10px;
-    margin-bottom: 8px;
-    border-radius: 6px;
+    padding: 12px 15px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    font-weight: 500;
+    border: 1px solid transparent;
 }
 
 .flash.success {
     background: #d1fae5;
     color: #065f46;
+    border-color: #a7f3d0;
 }
 
 .flash.warning {
-    background: #ffedd5;
-    color: #92400e;
+    background: #fff7ed;
+    color: #b45309;
+    border-color: #fed7aa;
 }
 
 .flash.danger {
     background: #fee2e2;
     color: #991b1b;
+    border-color: #fca5a5;
 }
 
-
-
-input[type=file] {
-    padding: 6px;
+/* Formulário */
+label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #374151;
 }
 
-pre {
-    background: #f3f4f6;
+input[type=file],
+select,
+input[type=text],
+textarea {
     padding: 10px;
+    border: 1px solid #d1d5db;
     border-radius: 6px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 15px;
+    transition: border-color 0.2s, box-shadow 0.15s;
 }
 
+input[type=file]:focus,
+select:focus,
+input[type=text]:focus,
+textarea:focus {
+    border-color: #2563eb;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
 
-/*-------------Gabriel------------*/
-#case{max-width: 800px;}
+/* Botões */
+button,
+.button {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #2563eb;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: background 0.2s, transform 0.1s;
+}
 
+button:hover,
+.button:hover {
+    background: #1d4ed8;
+}
 
+button:active,
+.button:active {
+    transform: translateY(1px);
+}
 
-/*---------------------------------*/
+/* Pré-visualização de texto */
+pre {
+    background: #f9fafb;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    white-space: pre-wrap;
+    font-size: 0.95rem;
+    color: #374151;
+}
+
+/* Links */
+a {
+    color: #2563eb;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+}
+
+/* Separador */
+hr {
+    border: 0;
+    border-top: 1px solid #e5e7eb;
+    margin: 30px 0;
+}
+
+/* Responsividade básica */
+@media (max-width: 640px) {
+    .topbar {
+        padding: 12px 16px;
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .container {
+        margin: 20px;
+        padding: 20px;
+    }
+
+    .brand {
+        font-size: 1.25rem;
+    }
+}
