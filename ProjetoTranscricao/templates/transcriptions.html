@@ -1,23 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
   <h2>Resultado da Transcrição</h2>
-  <p><strong>Arquivo:</strong> {{ filename }}</p>
-  <p><strong>Nível de Qualidade Usado:</strong> {{ quality_used }}</p>
+  <p><strong>Arquivo:</strong> {{ nome_arquivo }}</p>
+  <p><strong>Nível de Qualidade Usado:</strong> {{ qualidade_usada }}</p>
   
   <h3>Texto Transcrito:</h3>
-  <pre style="white-space:pre-wrap;">{{ text }}</pre>
+  <pre style="white-space:pre-wrap;">{{ texto_transcrito }}</pre>
 
   <hr>
   
   <p>
-    <form method="POST" action="{{ url_for('download_text') }}" style="display:inline;">
-        <input type="hidden" name="text_content" value="{{ text }}">
+    <form method="POST" action="{{ url_for('baixar_texto') }}" style="display:inline;">
+        <input type="hidden" name="conteudo_texto" value="{{ texto_transcrito }}">
         <button type="submit">Baixar TXT da Transcrição</button>
     </form>
     
-    <a href="{{ url_for('uploaded_file', filename=filename) }}" style="margin-left: 10px;">Baixar Áudio Original</a>
+    <a href="{{ url_for('pegar_arquivo', nome=nome_arquivo) }}" style="margin-left: 10px;">Baixar Áudio Original</a>
     
-    <a href="{{ url_for('index') }}" style="margin-left: 10px;">Fazer Nova Transcrição</a>
+    <a href="{{ url_for('inicio') }}" style="margin-left: 10px;">Fazer Nova Transcrição</a>
   </p>
   
   <p>Observação: esta transcrição não é salva no servidor.</p>
