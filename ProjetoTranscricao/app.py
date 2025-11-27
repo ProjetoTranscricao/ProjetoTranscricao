@@ -1,207 +1,117 @@
 import os
 from datetime import datetime
-from pathlib import Path
 from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, Response
 from werkzeug.utils import secure_filename
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from models import db, User, Transcription
 import whisper
-import config
-
-
-ALLOWED_EXTENSIONS = {"wav", "m4a", "mp3", "flac", "ogg", "mpga", "aac"}
 
 app = Flask(__name__)
-app.config.from_object("config")
-app.secret_key = app.config["SECRET_KEY"]
-app.config["UPLOAD_FOLDER"] = config.UPLOAD_FOLDER
-app.config["SQLALCHEMY_DATABASE_URI"] = config.SQLALCHEMY_DATABASE_URI
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = config.SQLALCHEMY_TRACK_MODIFICATIONS
-app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB de limite
+app.secret_key = "chave_secreta"
+
+# Pasta onde os áudios serão salvos
+app.config["UPLOAD_PASTA"] = os.path.join(os.getcwd(), "uploads")
+
+# Formatos aceitos
+FORMATOS = ["mp3", "wav", "m4a", "webm", "mp4", "ogg"]
+
+# Modelos disponíveis
+mapa_qualidade = {
+    "Simples": "tiny",
+    "Media": "base",
+    "Precisa": "large"
+}
+
+modelo = None
+modelo_atual = None
 
 
-
-db.init_app(app)
-with app.app_context():
-    db.create_all()
-
-
-login_manager = LoginManager()
-login_manager.login_view = "login"
-login_manager.init_app(app)
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
-
-
-
-ffmpeg_bin = config.FFMPEG_BIN
-if os.path.isdir(ffmpeg_bin):
-    os.environ["PATH"] = ffmpeg_bin + os.pathsep + os.environ.get("PATH", "")
-
-print("Carregando modelo Whisper (una única vez)...")
-MODEL_NAME = os.environ.get("WHISPER_MODEL", "small")
-model = whisper.load_model(MODEL_NAME)
-print(f"Modelo '{MODEL_NAME}' carregado com sucesso.")
-
-
-
-def allowed_file(filename):
-    """Verifica se o arquivo tem extensão permitida."""
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-def save_uploaded_file(file):
-    """Salva arquivo enviado e retorna caminho"""
-    filename = secure_filename(file.filename)
-    timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
-    saved_name = f"{timestamp}_{filename}"
-    saved_path = os.path.join(app.config["UPLOAD_FOLDER"], saved_name)
-    file.save(saved_path)
-    return saved_name, saved_path
-
+def arquivo_ok(nome):
+    return "." in nome and nome.rsplit(".", 1)[1].lower() in FORMATOS
 
 
 @app.route("/")
-def index():
-    return render_template("index.html", user=current_user)
+def inicio():
+    return render_template("index.html")
 
 
+@app.route("/transcrever", methods=["POST"])
+def transcrever():
+    global modelo, modelo_atual
 
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
+    qualidade = request.form.get("quality", "Simples")
+    nome_modelo = mapa_qualidade.get(qualidade, "tiny")
 
-        if not username or not password:
-            flash("Usuário e senha são obrigatórios.", "warning")
-            return redirect(url_for("register"))
+    # Carregar modelo se mudou
+    if nome_modelo != modelo_atual or modelo is None:
+        try:
+            print("Carregando modelo:", nome_modelo)
+            modelo = whisper.load_model(nome_modelo)
+            modelo_atual = nome_modelo
+        except:
+            print("Falha ao carregar modelo. Tentando tiny.")
+            modelo = whisper.load_model("tiny")
+            modelo_atual = "tiny"
 
-        if User.query.filter_by(username=username).first():
-            flash("Usuário já existe.", "danger")
-            return redirect(url_for("register"))
-
-        user = User(username=username, password_hash=generate_password_hash(password))
-        db.session.add(user)
-        db.session.commit()
-
-        flash("Conta criada com sucesso! Faça login.", "success")
-        return redirect(url_for("login"))
-
-    return render_template("register.html")
-
-
-
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        username = request.form.get("username").strip()
-        password = request.form.get("password")
-
-        user = User.query.filter_by(username=username).first()
-
-        if user and check_password_hash(user.password_hash, password):
-            login_user(user)
-            flash("Logado com sucesso.", "success")
-            return redirect(url_for("index"))
-
-        flash("Usuário ou senha incorretos.", "danger")
-        return redirect(url_for("login"))
-
-    return render_template("login.html")
-
-
-
-
-@app.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    flash("Você saiu da conta.", "info")
-    return redirect(url_for("index"))
-
-
-
-
-@app.route("/uploads/<path:filename>")
-def uploaded_file(filename):
-    return send_from_directory(app.config["UPLOAD_FOLDER"], filename, as_attachment=True)
-
-
-
-@app.route("/transcribe", methods=["POST"])
-def transcribe():
     if "audio" not in request.files:
         flash("Nenhum arquivo enviado.", "warning")
-        return redirect(url_for("index"))
+        return redirect(url_for("inicio"))
 
-    file = request.files["audio"]
+    arq = request.files["audio"]
 
-    if file.filename == "":
-        flash("Selecione um arquivo válido.", "warning")
-        return redirect(url_for("index"))
+    if arq.filename == "":
+        flash("Nenhum arquivo selecionado.", "warning")
+        return redirect(url_for("inicio"))
 
-    if not allowed_file(file.filename):
-        flash("Tipo de arquivo não permitido.", "danger")
-        return redirect(url_for("index"))
+    if not arquivo_ok(arq.filename):
+        flash("Formato de arquivo não aceito.", "danger")
+        return redirect(url_for("inicio"))
 
-    saved_name, saved_path = save_uploaded_file(file)
+    nome_limpo = secure_filename(arq.filename)
+    tempo = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    nome_salvo = f"{tempo}_{nome_limpo}"
 
+    pasta = app.config["UPLOAD_PASTA"]
+    os.makedirs(pasta, exist_ok=True)
+
+    caminho = os.path.join(pasta, nome_salvo)
+    arq.save(caminho)
+
+    # Transcrição
     try:
-        result = model.transcribe(saved_path)
-        text = result.get("text", "").strip()
+        print("Transcrevendo:", caminho)
+        resultado = modelo.transcribe(caminho)
+        texto = resultado.get("text", "").strip()
+        print("Texto retornado:", repr(texto))
     except Exception as e:
-        flash(f"Erro ao transcrever: {e}", "danger")
-        return redirect(url_for("index"))
+        print("Erro:", e)
+        flash("Erro durante a transcrição.", "danger")
+        return redirect(url_for("inicio"))
 
-    if current_user.is_authenticated:
-        t = Transcription(
-            user_id=current_user.id,
-            filename=saved_name,
-            text=text
-        )
-        db.session.add(t)
-        db.session.commit()
-
-        flash("Transcrição concluída e salva!", "success")
-        return redirect(url_for("my_transcriptions"))
-
-    # Convidado → só mostra
-    return render_template("transcriptions.html", text=text, filename=saved_name, guest=True)
-
-
-
-
-@app.route("/my")
-@login_required
-def my_transcriptions():
-    trans = Transcription.query.filter_by(
-        user_id=current_user.id
-    ).order_by(Transcription.created_at.desc()).all()
-
-    return render_template("transcriptions.html", transcriptions=trans, guest=False)
-
-
-
-@app.route("/download/<int:tid>")
-@login_required
-def download_transcription(tid):
-    t = Transcription.query.filter_by(id=tid, user_id=current_user.id).first_or_404()
-    filename = f"transcription_{t.id}.txt"
-    return Response(
-        t.text,
-        mimetype="text/plain",
-        headers={"Content-Disposition": f"attachment;filename={filename}"}
+    return render_template(
+        "transcriptions.html",
+        nome_arquivo=nome_salvo,
+        qualidade_usada=qualidade,
+        texto_transcrito=texto
     )
 
+
+@app.route("/baixar_texto", methods=["POST"])
+def baixar_texto():
+    conteudo = request.form.get("conteudo_texto", "")
+    tempo = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    nome = f"transcricao_{tempo}.txt"
+
+    return Response(
+        conteudo,
+        mimetype="text/plain",
+        headers={"Content-Disposition": f"attachment;filename={nome}"}
+    )
+
+
+@app.route("/uploads/<nome>")
+def pegar_arquivo(nome):
+    pasta = app.config["UPLOAD_PASTA"]
+    return send_from_directory(pasta, nome, as_attachment=True)
 
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-
