@@ -1,8 +1,7 @@
 Flask>=2.1
 Flask-Login>=0.6
-whisper @ git+https://github.com/openai/whisper.git
+openai-whisper
 numpy
-torch
+torch --index-url https://download.pytorch.org/whl/cpu
 python-dotenv
 werkzeug
-
