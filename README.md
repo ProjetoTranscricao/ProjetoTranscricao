@@ -30,7 +30,7 @@ O projeto é organizado da seguinte forma:
 
 ---
 
-## ⚙️ Como Executar
+## Como Executar
 
 ### 1. Instalar dependências
 ```bash
